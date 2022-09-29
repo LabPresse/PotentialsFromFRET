@@ -13,3 +13,7 @@ See example.py for a demonstration.
 
 We additionally created a class "FRETAnalyzerHMM" which performs the same analysis with HMM methods. Running the FRETAnalyzerHMM is identical to running FRETAnalyzer.
 
+# Questions and further explanation
+
+FRETAnalyzer is a work in progress. Further documentation will be provided as it is created. If you require assistance or would like more details, please do not hesitate to contact us at jsbryan4@asu.edu
+
