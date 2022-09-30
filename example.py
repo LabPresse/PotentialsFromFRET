@@ -21,11 +21,12 @@ h5.close()
 data = data[:, :num_data]
 
 # Run analysis
-MAP, history = FRETAnalyzer.learn_potential(data, parameters=parameters)
+MAP = FRETAnalyzer.learn_potential(data, parameters=parameters)
 FRETAnalyzer.plot_variables(data, MAP)
 
 # Run analysis HMM
-MAP_HMM, history_HMM = FRETAnalyzerHMM.learn_potential(data, parameters=parameters)
+MAP_HMM = FRETAnalyzerHMM.learn_potential(data, parameters=parameters)
 FRETAnalyzerHMM.plot_variables(data, MAP_HMM)
+energies = FRETAnalyzerHMM.calculate_energy(MAP_HMM)
 
-
+print("Completed")

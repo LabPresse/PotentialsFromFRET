@@ -1157,7 +1157,7 @@ class FRETAnalyzer:
     
     @staticmethod
     def learn_potential(data, parameters=None, num_iter=1000, 
-                        saveas=None, plot_status=True, log=False, **kwargs):
+                        saveas=None, plot_status=False, log=False, **kwargs):
 
         # Print status
         print("Starting inference")
