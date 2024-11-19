@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: "J Shepard"
+    given-names: "Bryan IV"
+  - family-names: "Presse"
+    given-names: "Steve"
+title: "Skipper-FRET"
+version: "1.0"
+date-released: "2022-9-22"
+url: "https://github.com/LabPresse/PotentialsFromFRET"
