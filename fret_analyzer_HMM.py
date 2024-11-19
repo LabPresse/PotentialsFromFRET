@@ -1,20 +1,15 @@
 
-import sys
+# Import libraries
 import time
-import h5py
 import copy
 import numpy as np
-import numba as nb
 import matplotlib.pyplot as plt
 import scipy.linalg
 from scipy import stats
 from types import SimpleNamespace
 from matplotlib import gridspec
-from joblib import Parallel, delayed
-from mpl_toolkits.axes_grid1.inset_locator import inset_axes, mark_inset
-sys.path.append('../')
-from tools.algorithms import FFBS
-from tools.bayes_tools import HistoryH5
+from algorithms import FFBS
+from algorithms import HistoryH5
 
 
 # Units are nanoseconds (ns), nanometers (nm), attograms (ag)

@@ -1,19 +1,15 @@
 
+# Import libraries
 import time
-import h5py
 import copy
 import numpy as np
 import numba as nb
-import dill as pickle
 import matplotlib.pyplot as plt
 from scipy import stats
 from types import SimpleNamespace
 from matplotlib import gridspec
 from joblib import Parallel, delayed
-from mpl_toolkits.axes_grid1.inset_locator import inset_axes, mark_inset
-import sys
-sys.path.append('../')
-from tools.bayes_tools import HistoryH5
+from algorithms import HistoryH5
 
 
 # Kernel function
@@ -43,8 +39,6 @@ def kernel_FRET(x1, x2, sig, ell, d_dx=False, dd_ddx=False):
                         K[i + num_1 * d, j] = - Kij * (ell2 - (x1[i, d] - x2[j, d]) ** 2) / ell4
 
     return K
-
-
 
 # Units are nanoseconds (ns), nanometers (nm), attograms (ag)
 PARAMETERS = {
