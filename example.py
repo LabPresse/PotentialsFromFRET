@@ -26,7 +26,7 @@ data = data[:, :num_data]
 # Run analysis using Skipper-FRET
 print("Running analysis using Skipper-FRET")
 MAP = FRETAnalyzer.learn_potential(
-    data, parameters=parameters, num_iter=100,
+    data, parameters=parameters, num_iter=10,
 )
 
 # Plot variables

@@ -9,7 +9,6 @@ from scipy import stats
 from types import SimpleNamespace
 from matplotlib import gridspec
 from algorithms import FFBS
-from algorithms import HistoryH5
 
 
 # Units are nanoseconds (ns), nanometers (nm), attograms (ag)
@@ -686,17 +685,16 @@ class FRETAnalyzerHMM:
 
 
     @staticmethod
-    def learn_potential(data, parameters=None, num_iter=1000, 
-                        saveas=None, plot_status=False, log=False, **kwargs):
+    def learn_potential(
+        data, parameters=None, num_iter=1000, 
+        plot_status=False, log=False, **kwargs
+    ):
         
         # Set up log
         if not log:
             pass
         elif log is True:
-            if saveas is not None:
-                log = saveas.split('/')[-1] + '.log'
-            else:
-                log = f'log{np.random.randint(1e6)}.log'
+            log = f'log{np.random.randint(1e6)}.log'
         elif not log.lower().endswith('.log'):
             log = f'{log}.log'
 
@@ -724,21 +722,6 @@ class FRETAnalyzerHMM:
 
         # Set up history
         MAP = copy.deepcopy(variables)
-        if saveas is not None:
-            history = HistoryH5(
-                save_name=saveas,
-                variables=variables,
-                num_iter=num_iter,
-                fields=[
-                    'r',
-                    'U',
-                    'kx',
-                    'kd',
-                    'ka',
-                    'pi',
-                    'P',
-                ],
-            )
 
         # Gibbs sampler
         for i in range(num_iter):
@@ -761,8 +744,6 @@ class FRETAnalyzerHMM:
             variables.P = FRETAnalyzerHMM.posterior(data, variables)
             if variables.P >= MAP.P:
                 MAP = copy.deepcopy(variables)
-            if saveas is not None:
-                history.checkpoint(variables, i)
             print('%', end='')
 
             # Plot
@@ -778,7 +759,4 @@ class FRETAnalyzerHMM:
 
         # Return output
         print('Sampling complete')
-        if saveas is not None:
-            return MAP, history
-        else:
-            return MAP
+        return MAP

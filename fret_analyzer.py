@@ -9,7 +9,6 @@ from scipy import stats
 from types import SimpleNamespace
 from matplotlib import gridspec
 from joblib import Parallel, delayed
-from algorithms import HistoryH5
 
 
 # Kernel function
@@ -947,8 +946,6 @@ class FRETAnalyzer:
                 variables = SimpleNamespace(inputs)
             elif type(inputs) == SimpleNamespace:
                 variables = inputs
-            elif type(inputs) == HistoryH5:
-                variables = inputs.get('MAP')
             dt = variables.dt
             num_traj = variables.num_traj
             traj_mask = variables.traj_mask
@@ -981,9 +978,6 @@ class FRETAnalyzer:
             variables = SimpleNamespace(inputs)
         elif type(inputs) == SimpleNamespace:
             variables = inputs
-        elif type(inputs) == HistoryH5:
-            history = inputs
-            variables = history.get('MAP')
 
         # Set up ax
         if ax is None:
@@ -1037,12 +1031,6 @@ class FRETAnalyzer:
             variables = SimpleNamespace(inputs)
         elif type(inputs) == SimpleNamespace:
             variables = inputs
-        elif type(inputs) == HistoryH5:
-            history = inputs
-            variables = history.get('MAP')
-            probs = history.get('P')
-            last = min([*np.where(probs == 0)[0], probs.shape[0]])
-            burn = int(.9 * last)
 
         # Set up ax
         if ax is None:
@@ -1073,31 +1061,14 @@ class FRETAnalyzer:
         if xzero is None:
             xzero = R0
         i0 = np.argmin(np.abs(x_grid - xzero))
-        if type(inputs) == HistoryH5:
-            u_hist_indu = history.get('u_indu', burn=burn, last=last)
-            u_hist_grid = K_grid_indu @ K_indu_indu_inv @ u_hist_indu[:, :, 0].T
-            u_hist_grid -= u_hist_grid[i0, :]
-            u_grid_mean = np.mean(u_hist_grid, axis=1)
-            u_grid_std = np.std(u_hist_grid, axis=1)
-        else:
-            u_grid = (K_grid_indu @ K_indu_indu_inv @ u_indu).reshape(-1, order='F')
-            u_grid -= u_grid[i0]
+        u_grid = (K_grid_indu @ K_indu_indu_inv @ u_indu).reshape(-1, order='F')
+        u_grid -= u_grid[i0]
 
         # Plot Potential
         if gt and (gt.force is not None):
             U_gt = np.cumsum(gt.force(x_grid[::-1]))[::-1] * (x_grid[1] - x_grid[0]) / kT
             U_gt -= U_gt[i0]
             ax.plot(U_gt, x_grid, color='r', label='Ground truth')
-        if type(inputs) == HistoryH5:
-            ax.plot(u_grid_mean, x_grid, color='b', label='FRET-SKIPPER')
-            ax.fill_betweenx(
-                x_grid[:, 0],
-                u_grid_mean - u_grid_std,
-                u_grid_mean + u_grid_std,
-                color='skyblue',
-                alpha=.5,
-                label='Uncertainty',
-            )
         else:
             ax.plot(u_grid, x_grid, color='b', label='Sampled potential')
         ax.legend(bbox_to_anchor=(1.01, 1), loc='upper left')
@@ -1150,8 +1121,10 @@ class FRETAnalyzer:
         return ax
     
     @staticmethod
-    def learn_potential(data, parameters=None, num_iter=1000, 
-                        saveas=None, plot_status=False, log=False, **kwargs):
+    def learn_potential(
+        data, parameters=None, num_iter=1000, 
+        plot_status=False, log=False, **kwargs
+    ):
 
         # Print status
         print("Starting inference")
@@ -1160,10 +1133,7 @@ class FRETAnalyzer:
         if not log:
             pass
         elif log is True:
-            if saveas is not None:
-                log = saveas.split('/')[-1] + '.log'
-            else:
-                log = f'log{np.random.randint(1e6)}.log'
+            log = f'log{np.random.randint(1e6)}.log'
         elif not log.lower().endswith('.log'):
             log = f'{log}.log'
 
@@ -1191,21 +1161,6 @@ class FRETAnalyzer:
 
         # Set up history
         MAP = copy.deepcopy(variables)
-        if saveas is not None:
-            history = HistoryH5(
-                save_name=saveas,
-                variables=variables,
-                num_iter=num_iter,
-                fields=[
-                    'z',
-                    'kx',
-                    'kd',
-                    'ka',
-                    # 'x_data',
-                    'u_indu',
-                    'P',
-                ],
-            )
 
         # Gibbs sampler
         for i in range(num_iter):
@@ -1228,8 +1183,6 @@ class FRETAnalyzer:
             variables.P = FRETAnalyzer.posterior(data, variables)
             if variables.P >= MAP.P:
                 MAP = copy.deepcopy(variables)
-            if saveas is not None:
-                history.checkpoint(variables, i)
             print('%', end='')
 
             # Plot
@@ -1245,9 +1198,6 @@ class FRETAnalyzer:
 
         # Return output
         print('Sampling complete')
-        if saveas is not None:
-            return MAP, history
-        else:
-            return MAP
+        return MAP
 
 
